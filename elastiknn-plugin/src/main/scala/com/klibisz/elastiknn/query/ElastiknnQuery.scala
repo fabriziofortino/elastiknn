@@ -10,7 +10,7 @@ import org.apache.lucene.index.IndexReader
 import org.apache.lucene.search.Query
 import org.elasticsearch.common.lucene.search.function.ScoreFunction
 import org.elasticsearch.index.mapper.MappedFieldType
-import org.elasticsearch.index.query.QueryShardContext
+import org.elasticsearch.index.query.SearchExecutionContext
 
 import scala.language.implicitConversions
 import scala.util._
@@ -30,7 +30,7 @@ object ElastiknnQuery {
     new IllegalArgumentException(msg)
   }
 
-  def getMapping(context: QueryShardContext, field: String): Mapping = {
+  def getMapping(context: SearchExecutionContext, field: String): Mapping = {
     import VectorMapper._
     val mft: MappedFieldType = context.getFieldType(field)
     mft match {
@@ -43,7 +43,7 @@ object ElastiknnQuery {
     }
   }
 
-  def apply(query: NearestNeighborsQuery, queryShardContext: QueryShardContext): Try[ElastiknnQuery[_]] =
+  def apply(query: NearestNeighborsQuery, queryShardContext: SearchExecutionContext): Try[ElastiknnQuery[_]] =
     apply(query, getMapping(queryShardContext, query.field))
 
   private implicit def toSuccess[A <: Vec](q: ElastiknnQuery[A]): Try[ElastiknnQuery[A]] = Success(q)

@@ -1,7 +1,7 @@
 buildscript {
     ext {
-        esVersion = '7.11.2'
-        luceneVersion = '8.7.0'
+        esVersion = '7.14.2'
+        luceneVersion = '8.9.0'
         circeVersion= '0.13.0'
         scalaShortVersion = '2.12'
         scalaFullVersion = '2.12.10'
@@ -207,7 +207,7 @@ configure(clientElastic4s, List.of(
         {
             dependencies {
                 api api4s
-                api 'com.sksamuel.elastic4s:elastic4s-client-esjava_2.12:7.6.0'
+                api 'com.sksamuel.elastic4s:elastic4s-client-esjava_2.12:7.14.1'
                 implementation "org.scala-lang:scala-library:${scalaFullVersion}"
             }
         }))

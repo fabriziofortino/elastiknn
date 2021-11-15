@@ -7,7 +7,6 @@ import com.klibisz.elastiknn.api.ElasticsearchCodec._
 import com.klibisz.elastiknn.api._
 import com.klibisz.elastiknn.utils.CirceUtils
 import com.klibisz.elastiknn.{ELASTIKNN_NAME, api}
-import com.klibisz.elastiknn._
 import io.circe.Json
 import org.apache.lucene.search.Query
 import org.apache.lucene.util.SetOnce
@@ -64,7 +63,7 @@ final case class KnnQueryBuilder(query: NearestNeighborsQuery) extends AbstractQ
     case _                => this
   }
 
-  override def doToQuery(context: QueryShardContext): Query =
+  override def doToQuery(context: SearchExecutionContext): Query =
     ElastiknnQuery(query, context).map(_.toLuceneQuery(context.getIndexReader)).get
 
   override def doEquals(other: KnnQueryBuilder): Boolean = other.query == this.query

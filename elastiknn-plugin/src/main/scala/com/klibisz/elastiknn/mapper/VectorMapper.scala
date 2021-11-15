@@ -14,9 +14,8 @@ import org.apache.lucene.search.{DocValuesFieldExistsQuery, Query, TermQuery}
 import org.apache.lucene.util.BytesRef
 import org.elasticsearch.common.xcontent.XContentParser.Token
 import org.elasticsearch.common.xcontent.{ToXContent, XContentBuilder}
-import org.elasticsearch.index.mapper.Mapper.TypeParser
 import org.elasticsearch.index.mapper._
-import org.elasticsearch.index.query.QueryShardContext
+import org.elasticsearch.index.query.SearchExecutionContext
 
 import java.util
 import java.util.Collections
@@ -68,15 +67,15 @@ object VectorMapper {
       extends MappedFieldType(fieldName, true, true, true, TextSearchInfo.NONE, Collections.emptyMap()) {
     override def typeName(): String = typeName
     override def clone(): FieldType = new FieldType(typeName, fieldName, mapping)
-    override def termQuery(value: Any, context: QueryShardContext): Query = value match {
+    override def termQuery(value: Any, context: SearchExecutionContext): Query = value match {
       case b: BytesRef => new TermQuery(new Term(name(), b))
       case _ =>
         throw new ElastiknnUnsupportedOperationException(
           s"Field [${name()}] of type [${typeName()}] doesn't support term queries with value of type [${value.getClass}]")
     }
-    override def existsQuery(context: QueryShardContext): Query = new DocValuesFieldExistsQuery(name())
+    override def existsQuery(context: SearchExecutionContext): Query = new DocValuesFieldExistsQuery(name())
 
-    override def valueFetcher(context: QueryShardContext, format: String): ValueFetcher = {
+    override def valueFetcher(context: SearchExecutionContext, format: String): ValueFetcher = {
       // TODO: figure out what this is and implement it.
       throw new ElastiknnUnsupportedOperationException(s"Field [${name()}] of type [${typeName()}] doesn't support this operation yet.")
     }
@@ -102,7 +101,7 @@ abstract class VectorMapper[V <: Vec: ElasticsearchCodec] { self =>
   import com.klibisz.elastiknn.utils.CirceUtils._
 
   class TypeParser extends Mapper.TypeParser {
-    override def parse(name: String, node: JavaJsonMap, parserContext: TypeParser.ParserContext): Mapper.Builder = {
+    override def parse(name: String, node: JavaJsonMap, parserContext: MappingParserContext): Mapper.Builder = {
       val mapping: Mapping = ElasticsearchCodec.decodeJsonGet[Mapping](node.asJson)
       val builder: Builder = new Builder(name, mapping)
       // TypeParsers.parseField(builder, name, node, parserContext)
@@ -176,8 +175,8 @@ abstract class VectorMapper[V <: Vec: ElasticsearchCodec] { self =>
 
         override def contentType(): String = CONTENT_TYPE
 
-        override def doXContentBody(builder: XContentBuilder, includeDefaults: Boolean, params: ToXContent.Params): Unit = {
-          super.doXContentBody(builder, includeDefaults, params)
+        override def doXContentBody(builder: XContentBuilder, params: ToXContent.Params): Unit = {
+          super.doXContentBody(builder, params)
           ElasticsearchCodec
             .encode(mapping)
             .asObject
