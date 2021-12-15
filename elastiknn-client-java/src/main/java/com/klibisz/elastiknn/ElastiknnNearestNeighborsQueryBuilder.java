@@ -4,9 +4,9 @@ import com.klibisz.elastiknn.api4j.ElastiknnNearestNeighborsQuery;
 import com.klibisz.elastiknn.api4j.Vector;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.SearchExecutionContext;
+import org.elasticsearch.xcontent.XContentBuilder;
 
 import java.io.IOException;
 import java.util.Objects;

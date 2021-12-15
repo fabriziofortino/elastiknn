@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        esVersion = '7.15.2'
-        luceneVersion = '8.9.0'
-        elastic4sVersion = '7.15.2'
+        esVersion = '7.16.0'
+        luceneVersion = '8.10.1'
+        elastic4sVersion = '7.15.4'
         circeVersion= '0.14.1'
         circeGenericExtrasVersion= '0.14.1'
         scalaShortVersion = '2.13'
@@ -295,7 +295,7 @@ configure(testing, List.of(scalaProjectConfig, {
         implementation 'org.apache.commons:commons-math3:3.6.1'
         implementation "org.apache.lucene:lucene-analyzers-common:${luceneVersion}"
         implementation "org.apache.lucene:lucene-codecs:${luceneVersion}"
-        implementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:${esVersion}"
+        implementation "co.elastic.clients:elasticsearch-java:${esVersion}"
         implementation "org.elasticsearch:elasticsearch:${esVersion}"
         implementation 'org.pegdown:pegdown:1.4.2'
         implementation "org.scala-lang:scala-library:${scalaFullVersion}"

@@ -10,8 +10,8 @@ import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.get.{GetAction, GetRequest, GetResponse}
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.io.stream.{StreamInput, StreamOutput, Writeable}
-import org.elasticsearch.common.xcontent.{ToXContent, XContentBuilder, XContentParser}
 import org.elasticsearch.index.query._
+import org.elasticsearch.xcontent.{ToXContent, XContentBuilder, XContentParser}
 import org.elasticsearch.{ElasticsearchException, ResourceNotFoundException}
 
 import java.util.Objects

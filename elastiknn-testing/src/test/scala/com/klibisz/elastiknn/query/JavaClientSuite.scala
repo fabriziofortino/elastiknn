@@ -1,5 +1,9 @@
 package com.klibisz.elastiknn.query
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient
+import co.elastic.clients.elasticsearch.core.SearchRequest
+import co.elastic.clients.json.jackson.JacksonJsonpMapper
+import co.elastic.clients.transport.rest_client.RestClientTransport
 import com.klibisz.elastiknn.api.ElasticsearchCodec._
 import com.klibisz.elastiknn.api._
 import com.klibisz.elastiknn.{ElastiknnNearestNeighborsQueryBuilder, api4j}
@@ -8,11 +12,10 @@ import com.klibisz.elastiknn.api4j.ElastiknnNearestNeighborsQuery.CosineLsh
 import com.klibisz.elastiknn.testing.ElasticAsyncClient
 import com.sksamuel.elastic4s.ElasticDsl._
 import org.apache.http.HttpHost
-import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.client.{RequestOptions, RestClient, RestHighLevelClient}
-import org.elasticsearch.common.xcontent.json.JsonXContent
-import org.elasticsearch.common.xcontent.{ToXContent, XContentBuilder}
-import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.apache.lucene.document.Document
+import org.elasticsearch.client.RestClient
+import org.elasticsearch.xcontent.json.JsonXContent
+import org.elasticsearch.xcontent.{ToXContent, XContentBuilder}
 import org.scalatest.funsuite.AsyncFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -30,11 +33,13 @@ class JavaClientSuite extends AsyncFunSuite with Matchers with ElasticAsyncClien
     val ids = corpus.indices.map(i => s"v$i")
     val mapping = Mapping.L2Lsh(corpus.head.dims, 50, 1, 2)
 
-    val javaClient = new RestHighLevelClient(RestClient.builder(new HttpHost("localhost", 9200, "http")))
+    val javaClient = new ElasticsearchClient(new RestClientTransport(
+      RestClient.builder(new HttpHost("localhost", 9200, "http")).build(), new JacksonJsonpMapper()
+    ))
     val query = new ElastiknnNearestNeighborsQuery.L2Lsh(new api4j.Vector.DenseFloat(corpus.head.values), 20, 2)
     val queryBuilder = new ElastiknnNearestNeighborsQueryBuilder(query, field)
-    val searchRequest = new SearchRequest()
-    searchRequest.source(new SearchSourceBuilder().query(queryBuilder))
+    queryBuilder.to
+    val searchRequest = SearchRequest.of(r => r.query())
 
     for {
       _ <- deleteIfExists(index)
@@ -44,10 +49,10 @@ class JavaClientSuite extends AsyncFunSuite with Matchers with ElasticAsyncClien
       _ <- eknn.execute(refreshIndex(index))
 
     } yield {
-      val javaClientResult = javaClient.search(searchRequest, RequestOptions.DEFAULT)
-      val hits = javaClientResult.getHits.getHits
-      hits.length shouldBe 10
-      hits.head.getId shouldBe "v0"
+      val javaClientResult = javaClient.search(searchRequest, classOf[Document])
+      val hits = javaClientResult.hits().hits()
+      hits.size() shouldBe 10
+      hits.get(0).id() shouldBe "v0"
     }
   }
 
